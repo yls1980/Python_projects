@@ -1,5 +1,5 @@
-from newsapi import NewsApiClient
-import pycountry
+#from newsapi import NewsApiClient
+#import pycountry
 
 # you have to get your api key from newapi.com and then paste it below
 # newsapi = NewsApiClient(api_key='6d74523f498e43409389d24e10ae2c37')
@@ -61,10 +61,48 @@ def cnn():
         if (slink[0] == '/'):
             slink = url + slink;
         print (stext,slink)
-    pref=''
 
-bbs()
-abcnews()
+def buzzfeed():
+    url = 'https://www.buzzfeed.com/'
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    datas = soup.find_all('h2', class_="feedItem_smallTitle__KLfqG")
+    for i, x in enumerate(datas):
+        slink = x.parent.attrs['href']
+        if (slink[0] == '/'):
+            slink = url + slink;
+        stext = x.text.strip()
+        print(stext, slink)
+    datas = soup.find_all('h2', class_="feedItem_title__0_9qB")
+    for i, x in enumerate(datas):
+        slink = x.parent.attrs['href']
+        if (slink[0] == '/'):
+            slink = url + slink;
+        stext = x.text.strip()
+        print(stext, slink)
+
+def dmail():
+    url = 'https://www.dailymail.co.uk/ushome/index.html'
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    datas = soup.find_all('h2', class_='linkro-darkred')
+    for i, x in enumerate(datas):
+        tegData = x.findNext('a')
+        slink = tegData.attrs['href']
+        if (slink[0] == '/'):
+            slink = url + slink;
+        stext= tegData.text.strip()
+        print(stext, slink)
+    datas = soup.find_all('span', class_='pufftext')
+    for i, x in enumerate(datas):
+        slink = x.find_parent('a').attrs['href']
+        if (slink[0] == '/'):
+            slink = url + slink;
+        stext= x.findNext('span', class_='arrow-small-r').findNext('strong').text.strip()
+        print(stext, slink)
 
 
-#<h3 class="cd__headline" data-analytics="News &amp; buzz_list-hierarchical-xs_article_"><a href="/2022/11/11/business/ftx-ceo-resigns/index.html"><span class="cd__headline-icon-vid cnn-icon"></span><span class="cd__headline-text vid-left-enabled">FTX files for bankrupcty as CEO resigns</span></a></h3>
+#bbs()
+#abcnews()
+#buzzfeed()
+#dmail()
