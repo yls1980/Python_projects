@@ -50,9 +50,9 @@ def ins_to_db(conn, rus_text,origin_text, eng_text, link, surl, lang):
         cur.close()
 
 
-def ins_text()
+def ins_text(rus_text,sorigin_text, eng_text, link, surl):
     conn = set_conn();
-    ins_to_db(conn, 'sdfd','sdfd','sdfd','sdfd','sdfd')
+    ins_to_db(conn, rus_text,sorigin_text, eng_text, link, surl)
     conn.close()
 
 #prus_text text,
@@ -69,31 +69,35 @@ def bbs():
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     datas = soup.find('body').find_all('a', class_='gs-c-promo-heading gs-o-faux-block-link__overlay-link gel-pica-bold nw-o-link-split__anchor', href=True)
+    conn = set_conn();
     for i, x in enumerate(datas):
         slink = x.attrs['href']
         if (slink[0] == '/'):
             slink = url + slink;
         stext = x.findNext('h3', class_='gs-c-promo-heading__title gel-pica-bold nw-o-link-split__text').text.strip()
-        print(stext, slink)
+        #print(stext, slink)
+        ins_to_db(conn,'',stext, stext, slink, url,'en')
+    conn.close()
 
 def abcnews():
     url = 'https://abcnews.go.com'
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     datas=soup.find('body').find_all('a', class_='AnchorLink VideoTile', href=True)
+    conn = set_conn();
     for i, x in enumerate(datas):
         slink = x.attrs['href']
         if (slink[0] == '/'):
             slink = url + slink;
         stext = x.findNext('h3',class_='VideoTile__Title').text.strip()
-        print (stext,slink)
+        ins_to_db(conn,'',stext, stext, slink, url,'en')
     datas = soup.find('body').find_all('a', class_='AnchorLink News__Item external flex flex-row', href=True)
     for i, x in enumerate(datas):
         slink = x.attrs['href']
         if (slink[0] == '/'):
             slink = url + slink;
         stext = x.findNext('h2', class_='News__Item__Headline enableHeadlinePremiumLogo').text.strip()
-        print(stext, slink)
+        ins_to_db(conn,'',stext, stext, slink, url,'en')
     datas = soup.find('body').find_all('a', class_='AnchorLink',attrs={"tabindex": "0"}, href=True)
     for i, x in enumerate(datas):
         if (x.text!=''):
@@ -101,7 +105,8 @@ def abcnews():
             if (slink[0] == '/'):
                 slink = url + slink;
             stext = x.text.strip()
-            print(stext, slink)
+            ins_to_db(conn,'',stext, stext, slink, url,'en')
+    conn.close()
 
 def cnn():
     browser = webdriver.Chrome()
@@ -109,51 +114,62 @@ def cnn():
     browser.get(url)
     soup = BeautifulSoup(browser.page_source)
     datas = soup.find_all('h3',class_='cd__headline')
+    conn = set_conn();
     for i, x in enumerate(datas):
         stext = x.text.strip()
         slink = x.findNext('a').attrs['href']
         if (slink[0] == '/'):
             slink = url + slink;
-        print (stext,slink)
+        #print (stext,slink)
+        ins_to_db(conn, '', stext, stext, slink, url, 'en')
+    conn.close()
 
 def buzzfeed():
     url = 'https://www.buzzfeed.com/'
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     datas = soup.find_all('h2', class_="feedItem_smallTitle__KLfqG")
+    conn = set_conn()
     for i, x in enumerate(datas):
         slink = x.parent.attrs['href']
         if (slink[0] == '/'):
-            slink = url + slink;
+            slink = url + slink
         stext = x.text.strip()
-        print(stext, slink)
+        #print(stext, slink)
+        ins_to_db(conn, '', stext, stext, slink, url, 'en')
     datas = soup.find_all('h2', class_="feedItem_title__0_9qB")
     for i, x in enumerate(datas):
         slink = x.parent.attrs['href']
         if (slink[0] == '/'):
-            slink = url + slink;
+            slink = url + slink
         stext = x.text.strip()
-        print(stext, slink)
+        #print(stext, slink)
+        ins_to_db(conn, '', stext, stext, slink, url, 'en')
+    conn.close()
 
 def dmail():
     url = 'https://www.dailymail.co.uk/ushome/index.html'
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     datas = soup.find_all('h2', class_='linkro-darkred')
+    conn = set_conn()
     for i, x in enumerate(datas):
         tegData = x.findNext('a')
         slink = tegData.attrs['href']
         if (slink[0] == '/'):
-            slink = url + slink;
+            slink = url + slink
         stext= tegData.text.strip()
-        print(stext, slink)
+        #print(stext, slink)
+        ins_to_db(conn, '', stext, stext, slink, url, 'en')
     datas = soup.find_all('span', class_='pufftext')
     for i, x in enumerate(datas):
         slink = x.find_parent('a').attrs['href']
         if (slink[0] == '/'):
-            slink = url + slink;
+            slink = url + slink
         stext= x.findNext('span', class_='arrow-small-r').findNext('strong').text.strip()
-        print(stext, slink)
+        #print(stext, slink)
+        ins_to_db(conn, '', stext, stext, slink, url, 'en')
+    conn.close()
 
 
 def mirror():
@@ -168,14 +184,17 @@ def mirror():
 
     soup = BeautifulSoup(browser.page_source)
     datas = soup.find_all('div', class_='story__title')
+    conn = set_conn()
     for i, x in enumerate(datas):
         tegData = x.findNext('h2')
         stext = tegData.text.strip()
         slink = x.find_parent('a').attrs['href']
         if (slink[0] == '/'):
             slink = url + slink;
-        print(stext, slink)
+        #print(stext, slink)
+        ins_to_db(conn, '', stext, stext, slink, url, 'en')
     browser.close()
+    conn.close()
 
 
 def washingtonpost():
@@ -183,47 +202,56 @@ def washingtonpost():
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     datas = soup.find_all('h2', class_='relative left font--headline font-bold font-size-sm')
+    conn = set_conn()
     for i, x in enumerate(datas):
         tegData = x.findNext('a')
         slink = tegData.attrs['href']
         if (slink[0] == '/'):
             slink = url + slink;
         stext= tegData.findNext('span').text.strip()
-        print(stext, slink)
+        #print(stext, slink)
+        ins_to_db(conn, '', stext, stext, slink, url, 'en')
+    conn.close()
 
 def foxnews():
     url = 'https://www.foxnews.com/'
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     datas = soup.find_all('h2', class_='title title-decoration-default')
+    conn = set_conn()
     for i, x in enumerate(datas):
         tegData = x.findNext('a')
         slink = tegData.attrs['href']
         if (slink[0] == '/'):
-            slink = url + slink;
+            slink = url + slink
         stext= tegData.text.strip()
-        print(stext, slink)
+        #print(stext, slink)
+        ins_to_db(conn, '', stext, stext, slink, url, 'en')
     datas = soup.find_all('h2', class_='title')
     for i, x in enumerate(datas):
         tegData = x.findNext('a')
         slink = tegData.attrs['href']
         if (slink[0] == '/'):
-            slink = url + slink;
+            slink = url + slink
         stext = tegData.text.strip()
-        print(stext, slink)
+        #print(stext, slink)
+        ins_to_db(conn, '', stext, stext, slink, url, 'en')
+    conn.close()
 
 def techcrunch():
     url = 'https://techcrunch.com/'
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     datas = soup.find_all('h3', class_='mini-view__item__title')
+    conn = set_conn()
     for i, x in enumerate(datas):
         tegData = x.findNext('a')
         slink = tegData.findNext('a').attrs['href']
         if (slink[0] == '/'):
             slink = url + slink;
         stext= tegData.text.strip()
-        print(stext, slink)
+        #print(stext, slink)
+        ins_to_db(conn, '', stext, stext, slink, url, 'en')
     datas = soup.find_all('header', class_='post-block__header')
     for i, x in enumerate(datas):
         tegData = x.findNext('h2', class_='post-block__title')
@@ -231,13 +259,16 @@ def techcrunch():
         if (slink[0] == '/'):
             slink = url + slink
         stext = x.findNext('div', class_='post-block__content').text.strip()
-        print(stext, slink)
+        #print(stext, slink)
+        ins_to_db(conn, '', stext, stext, slink, url, 'en')
+    conn.close()
 
 def meduza():
     url = 'https://meduza.io/'
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     datas = soup.find_all('a', class_='Link-root Link-isInBlockTitle')
+    conn = set_conn()
     for i, x in enumerate(datas):
         slink = x.attrs['href']
         if (slink[0] == '/'):
@@ -251,50 +282,62 @@ def meduza():
                 pass
             stext = '. '.join(texts)
             if stext!='':
-                print(stext, slink)
+                #print(stext, slink)
+                ins_to_db(conn, stext, stext, '', slink, url, 'ru')
+    conn.close()
 
 def kommersant():
     url = 'https://www.kommersant.ru/'
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     datas = soup.find_all('a', class_='uho__link uho__link--overlay')
+    conn = set_conn()
     for i, x in enumerate(datas):
         slink = x.attrs['href']
         if (slink[0] == '/'):
             slink = url + slink;
         stext = x.text.strip()
-        print(stext, slink)
+        #print(stext, slink)
+        ins_to_db(conn, stext, stext, '', slink, url, 'ru')
+    conn.close()
 
 def unian():
     url = 'https://www.unian.net/'
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     datas = soup.find_all('a', class_='list-news__title')
+    conn = set_conn()
     for i, x in enumerate(datas):
         slink = x.attrs['href']
         if (slink[0] == '/'):
             slink = url + slink;
         stext = x.text.strip()
-        print(stext, slink)
+        #print(stext, slink)
+        ins_to_db(conn, stext, stext, '', slink, url, 'ru')
     datas = soup.find_all('a', class_='main-publication__text')
     for i, x in enumerate(datas):
         slink = x.attrs['href']
         if (slink[0] == '/'):
             slink = url + slink;
         stext = x.text.strip()
-        print(stext, slink)
+        #print(stext, slink)
+        ins_to_db(conn, stext, stext, '', slink, url, 'ru')
+    conn.close()
 
 def svpressa():
     url = 'https://svpressa.ru/?utm_source=vsesmi_online'
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     datas = soup.find_all('a', class_='b-article__title')
+    conn = set_conn()
     for i, x in enumerate(datas):
         slink = x.attrs['href']
         if (slink[0] == '/'):
             slink = url + slink;
         stext = x.text.strip()
-        print(stext, slink)
+        #print(stext, slink)
+        ins_to_db(conn, stext, stext, '', slink, url, 'ru')
+    conn.close()
 
 def iz():
     browser = webdriver.Chrome()
@@ -302,13 +345,15 @@ def iz():
     browser.get(url)
     soup = BeautifulSoup(browser.page_source, 'html.parser')
     datas = soup.find_all('a', class_='two-infographic-block__item__inside__info')
+    conn = set_conn()
     for i, x in enumerate(datas):
         slink = x.attrs['href']
         if (slink[0] == '/'):
             slink = url + slink;
         stext = x.findNext('span').text.strip()
         if stext != '':
-            print(stext, slink)
+            #print(stext, slink)
+            ins_to_db(conn, stext, stext, '', slink, url, 'ru')
     datas = soup.find_all('a', class_='node__cart__item__inside url-box')
     for i, x in enumerate(datas):
         slink = x.attrs['href']
@@ -334,8 +379,10 @@ def iz():
                 pass
             stext = '. '.join(texts)
             if stext != '':
-                print(stext, slink)
+                #print(stext, slink)
+                ins_to_db(conn, stext, stext, '', slink, url, 'ru')
     browser.close()
+    conn.close()
 
 def rg():
     url = 'https://rg.ru/?utm_source=vsesmi_online'
@@ -345,6 +392,7 @@ def rg():
             soup.find_all('a', class_='NewsFeedItemAccent_link__B7ive')+ \
             soup.find_all('a', class_='PageIndexContentSecondSpiegelListPattern_title__lWoOM') + \
             soup.find_all('a', class_='NewsFeedItem_link__4XiJ_')
+    conn = set_conn()
     for i, x in enumerate(datas):
         slink = x.attrs['href']
         if (slink[0] == '/'):
@@ -364,7 +412,9 @@ def rg():
             pass
         stext = '. '.join(texts)
         if stext != '':
-            print(stext, slink)
+            #print(stext, slink)
+            ins_to_db(conn, stext, stext, '', slink, url, 'ru')
+    conn.close()
 
 def ukr():
     browser = webdriver.Chrome()
@@ -372,13 +422,16 @@ def ukr():
     browser.get(url)
     soup = BeautifulSoup(browser.page_source, 'html.parser')
     datas = soup.find_all('a', class_='im-tl_a')
+    conn = set_conn()
     for i, x in enumerate(datas):
         slink = x.attrs['href']
         if (slink[0] == '/'):
             slink = url + slink;
         stext = x.text.strip()
-        print(stext, slink,'ukr')
+        #print(stext, slink,'ukr')
+        ins_to_db(conn, '', stext, '', slink, url, 'ua')
     browser.close()
+    conn.clsoe()
 
 def hotnews():
     browser = webdriver.Chrome()
@@ -392,13 +445,16 @@ def hotnews():
         print('Не найдена кнопка активации')
     soup = BeautifulSoup(browser.page_source, 'html.parser')
     datas = soup.find_all('a', class_="snip")
+    conn = set_conn()
     for i, x in enumerate(datas):
         slink = x.attrs['href']
         if (slink[0] == '/'):
             slink = url + slink;
         stext = x.text.strip()
-        print(stext, slink, 'rom')
+        #print(stext, slink, 'rom')
+        ins_to_db(conn, '', stext, '', slink, url, 'ro')
     browser.close()
+    conn.close()
 
 def gazeta():
     browser = webdriver.Chrome()
@@ -412,19 +468,23 @@ def gazeta():
         print('Не найдена кнопка активации')
     soup = BeautifulSoup(browser.page_source, 'html.parser')
     datas = soup.find_all('a', class_="article")
+    conn = set_conn()
     for i, x in enumerate(datas):
         slink = x.attrs['href']
         if (slink[0] == '/'):
             slink = url + slink;
         stext = x.findNext('div',class_="article__title").text.strip()
-        print(stext, slink, 'pl')
+        #print(stext, slink, 'pl')
+        ins_to_db(conn, '', stext, '', slink, url, 'pl')
     browser.close()
+    conn.close()
 
 def svpressa():
     url = 'https://oxu.az/?utm_source=vsesmi_online'
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     datas = soup.find_all('div', class_='news-i')
+    conn = set_conn()
     for i, x in enumerate(datas):
         slink = x.findNext('a').attrs['href']
         if (slink[0] == '/'):
@@ -442,10 +502,12 @@ def svpressa():
         except:
             pass
         if stext != '':
-            print(stext, slink, 'az')
+            #print(stext, slink, 'az')
+            ins_to_db(conn, '', stext, '', slink, url, 'az')
+    conn.close()
 
 #bbs()
-#abcnews()
+abcnews()
 #buzzfeed()
 #dmail()
 #mirror()
