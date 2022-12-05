@@ -5,6 +5,7 @@
 # newsapi = NewsApiClient(api_key='6d74523f498e43409389d24e10ae2c37')
 
 #https://libguides.wlu.edu/c.php?g=357505&p=2412837
+import sys
 
 import requests
 from selenium import webdriver
@@ -14,6 +15,8 @@ from bs4 import BeautifulSoup
 import time
 import psycopg2
 from googletrans import Translator
+import logging
+from datetime import date
 
 def set_conn():
     conn = psycopg2.connect(dbname='zorrodb', user='zorropg',
@@ -22,32 +25,41 @@ def set_conn():
 
 
 def translate(stext,lfrom, lto):
-    translator = Translator()
-    translated = translator.translate(stext,  src=lfrom, dest=lto)
-    return translated.text
+    try:
+        translator = Translator()
+        translated = translator.translate(stext,  src=lfrom, dest=lto)
+        return translated.text
+    except Exception as e:
+        serr = 'Ошибка в строке {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__+';'+e
+        logging.error('%s raised an error', serr)
+        return ''
 
 def ins_to_db(conn, rus_text,origin_text, eng_text, link, surl, lang):
-    sorigin_text = origin_text
-    bload = True
-    if (rus_text!='' and eng_text==''):
-        eng_text = translate(rus_text, 'ru','en')
-        sorigin_text = rus_text
-    elif (rus_text=='' and eng_text!=''):
-        rus_text = translate(eng_text, 'en', 'ru')
-        sorigin_text = eng_text
-    elif (rus_text != '' and eng_text !=''):
-        sorigin_text = rus_text
-    elif (rus_text == '' and eng_text =='' and origin_text!=''):
-        rus_text = translate(eng_text, lang, 'ru')
-        eng_text = translate(eng_text, lang, 'en')
+    try:
         sorigin_text = origin_text
-    else:
-        bload = False
-    if bload:
-        cur = conn.cursor()
-        cur.execute('select public.ins_t_news_data(%s, %s, %s, %s, %s) as val', (rus_text,sorigin_text, eng_text, link, surl))
-        conn.commit()
-        cur.close()
+        bload = True
+        if (rus_text!='' and eng_text==''):
+            eng_text = translate(rus_text, 'ru','en')
+            sorigin_text = rus_text
+        elif (rus_text=='' and eng_text!=''):
+            rus_text = translate(eng_text, 'en', 'ru')
+            sorigin_text = eng_text
+        elif (rus_text != '' and eng_text !=''):
+            sorigin_text = rus_text
+        elif (rus_text == '' and eng_text =='' and origin_text!=''):
+            rus_text = translate(eng_text, lang, 'ru')
+            eng_text = translate(eng_text, lang, 'en')
+            sorigin_text = origin_text
+        else:
+            bload = False
+        if bload:
+            cur = conn.cursor()
+            cur.execute('select public.ins_t_news_data(%s, %s, %s, %s, %s) as val', (rus_text,sorigin_text, eng_text, link, surl))
+            conn.commit()
+            cur.close()
+    except Exception as e:
+        serr = 'Ошибка в строке {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__+';'+e
+        logging.error('%s raised an error', serr)
 
 
 def ins_text(rus_text,sorigin_text, eng_text, link, surl):
@@ -506,6 +518,7 @@ def svpressa():
             ins_to_db(conn, '', stext, '', slink, url, 'az')
     conn.close()
 
+logging.basicConfig(filename=f'getNews{date.today().strftime("%Y%m%d")}.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
 #bbs()
 abcnews()
 #buzzfeed()
